@@ -1,4 +1,4 @@
-# Repo containing material for my "Runtime types and IO-TS" talk (Uk)
+# Repo containing materials and samples from my "Runtime types and IO-TS" talk
 
 Contents:
 
