@@ -2,7 +2,7 @@ import * as SC from 'io-ts/Schema'
 import * as SA from 'io-ts/Schemable'
 import * as D from 'io-ts/Decoder'
 import * as Eq from 'io-ts/Eq'
-import { pipe, unsafeCoerce } from 'fp-ts/lib/function'
+import { flow, pipe, unsafeCoerce } from 'fp-ts/lib/function'
 import { HKT, Kind, Kind2, URIS, URIS2 } from 'fp-ts/lib/HKT'
 import * as A from 'fp-ts/Array'
 import * as E from 'fp-ts/Either'
@@ -109,7 +109,7 @@ export const productEq = myInterpreter(myEqSchemable)(ProductT)
 
 // raw data we get from some IO (API response, queue message etc.)
 // the data is correct by default
-// you can try and changing it to trigger a parsing error, e.g. try and change the currency to an unsupported value
+// you can try and change it to trigger a parsing error, e.g. try and change the currency to some unsupported value
 const rawInputData: unknown[] = [
   { id: 234, name: 'T-Shirt', color: 'black', price: 'EUR12' },
   { id: 345, name: 'T-Shirt', color: 'white', price: 'EUR15' },
@@ -125,29 +125,29 @@ const existingData: Product[] = [
   { id: 567, name: 'Jacket', color: 'green', price: {currency: 'EUR', value: 120.65} },
 ]
 
-// let's find all the products that have updated data compared to the existing data
-const updatedProducts = pipe(
-  rawInputData,// take uknown values array as input
-  A.map(productD.decode), // try decode all values 
-  A.sequence(E.Applicative), // flatten the list: (error | Product)[] -> error | Product[] 
-  E.map(products => { // find all corresponding products in existing data
-    return pipe(
-      products,
+const findUpdatedProducts = (rawData: unknown[]): E.Either<D.DecodeError, Product[]> => 
+  pipe(
+    rawData,// take uknown values array as input
+    A.map(productD.decode), // try decode all values 
+    A.sequence(E.Applicative), // flatten: (error | Product)[] -> error | Product[] 
+    E.map(flow( // find all corresponding products in existing data
       A.map<Product, [Product, O.Option<Product>]>(p => ([
-        p, 
+        p,
         pipe(existingData, A.findFirst(ep => ep.id === p.id))]))
-    )
-  }),
-  E.map(pp => pipe(// find all products that do not match existing product
-    pp,
-    A.filter(([p, ep]) => 
-      O.isNone(ep) || // we either don't have an existing product, i.e. incoming product is a new one
-      pipe(ep, O.exists(ep => !productEq.equals(ep, p))) // or existing product differs from incoming one 
-    ),
-    A.map(([p, _]) => p) // only return incoming parsed product
-  ))
-)
+    )),
+    E.map(flow(// find all products that do not match existing product
+      A.filter(([p, ep]) => 
+        // we either don't have an existing product, i.e. incoming product is a new one
+        O.isNone(ep) || 
+        // or existing product differs from incoming one 
+        pipe(ep, O.exists(ep => !productEq.equals(ep, p)))
+      ),
+      A.map(([p, _]) => p) // only return incoming parsed product
+    ))
+  )
 
+// let's find all the products that have updated data compared to the existing data
+const updatedProducts = findUpdatedProducts(rawInputData)
 if (E.isLeft(updatedProducts)) {
   console.log('Error parsing products data:', D.draw(updatedProducts.left))
 } else {
