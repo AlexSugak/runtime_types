@@ -1,0 +1,80 @@
+Ideas:
+- TS typesystem only exists at compile time, but sometimes it is benefitial to have information about types at runtime
+- example: doing equality comparison of objects based on the type info, i.e. the kind of properties the objects have and the types of those properties
+- another example: using types to validate/parse the server data on the client and vice versa  
+- statically typed compiled languages traditionally use various Reflection APIs to do this, i.e. accessing the information about types at runtime
+- another option recently becoming more popular is compile-time code generation, e.g. generating equality check function at compile time (C# source generators, Zig compile-time code execution)
+- the traditional approach in JS was to use a data schema definition is some standard (JSON Schema, Swagger) and then use libraries to generate code and/or do runtime checks based on that schema  
+- when using TS the drawback here is information duplication: we express the type info two times by first encoding it in the schema and then in TS types
+- this can be mitigated a bit by code generation, i.e. generating TS types from schema (see GraphQL->TS integrations).
+  the drawback here is that it is usually hard to integrate changes to the types after the schema is changed, because they live in two different "worlds" 
+  and because there is a physical artifact (generated types .ts file) with possible conflicts at merge time
+- the pseudo code here is: try { ValidType validData = parseValidateLib.parse(data, schema) as any } catch () {}
+- naturally, there appeared TS-native solutions, where the type iformation is expressed in TS, allowing to infer TS types from the schema
+- but, when we express "the schema" of a data structure, e.g. using a lib like Zod, 
+  we effectively express the "type" of that data structure, but we do this in a way for that type to be accessible at runtime. 
+  I.e. we manually create a "type info data structure" that can be used to implement a runtime function that uses that type info to perform parse/validation/equality check etc. tasks.   
+- so effectively we create "runtime types", or "predicate-based types" 
+- [TODO]: some theory on predicate-based types?
+- The more advanced and disciplinned approach here is a io-ts library that uses Codecs to encode TS types as runtime-accessibe values and then use that to: 
+  derive TS types, encode/decode raw values of that type etc. 
+- There is also a generalization available here: what if we separate HOW we express the runtime type from WHAT we do with it, 
+  or in terms of io-ts, the Schema and its Interpreter (Decoder, Guard, Eq, a custom one, etc.). 
+  Note that the Schema feature is experimental in io-ts
+- Another great example of using io-ts/Schema is generating Arbitrary instances for fast-check, this can be a real 10x feature
+- Another example of the same "schema/interpreter" approach: Clojure Spec library, where "specs" can be used to drive different features: 
+  from basic data validation to editor/intellisense integrations
+- Interesting side-note: both Clojure Spec and io-ts/Schema are in beta/experimental features. Is this becase expressing types at runtime (via predicates) is harder than statically?
+  Maybe we just lack proper theory developments in this area? 
+- IMPORTANT: composition is key! io-ts Schema and Intepreter interface allows us to derive complex behaviours (not just validation, but also fast-check arbitraries) by composing it from simpler blocks.
+- The goals of the talk are:
+  - give a broad overview of various solutions to "runtime types" problem
+  - showcase how functional programming can be used to solve real/practical problems
+
+Slides:
+1. Intro
+2. Background: languages, frameworks.
+    - Different languages and stacks
+    - Always one problem: anonymous/raw data parsing/validation/comparison
+    - eCommerce: product updates
+    - Grammarly: spelling suggestions 
+    - Forms: user input validation
+    - [TODO]: say something about looking for a generic solutions across stacks, to be referenced later when showing Interpreters
+3. Schema
+    - A contract between server and client, user input and our program etc.
+    - Usually stored in some special format
+    - Swagger, GraphQL, JSON Schema, Yup schema 
+4. Generating the types
+    - The schema is external to the client program
+    - Merge conflicts
+    - Changing the schema to please the types generator 
+    - No/limited control on the generated code
+    - as any as MyType
+5. Runtime types
+    - MyType vs isMyType(v: unknown): v is MyType
+    - + combinators to compose more complex types from simpler ones 
+    - you've seen it before: Yup, [TODO] 
+    - BUT: I want to have it defined once and used in multiple contexts
+          instead of using a separate library for server data parsing, forms validation, request payload encoding, etc.
+6. IO-TS
+    - provides data schema accessible at runtime with infered TS types
+    - Coupled to fp-ts and is more strict/functional
+    - !!! more extendable: new types can be added, while in Zod you are bound to what types Zod provides
+7. IO-TS: basic example
+8. IO-TS: Schemable
+    - decode, encode, equality
+    - one generic Schema and multiple Interpreters
+7. Extensibility: io-ts + fastcheck
+    - property-based testing: short explanation
+    - fastcheck: runtime types again!!!! (fc.string(), etc.)
+    - few lines of code to implement fc Schemable
+    - example of the fc test
+8. Zod
+    - TS-native solution, can infer types
+    - Focused on one use-case: parsing 
+    - Extended via community libraries
+    - more developer friendly at the expense of less extensibility
+9. Outro
+    - link to "leave your email" form for a new Unit Testing course
+
+

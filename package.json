@@ -1,0 +1,30 @@
+{
+  "name": "runtime_types",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc --build",
+    "serve": "ts-node ./src",
+    "start": "node ./dist",
+    "customTypes": "npm run build && node ./dist/custom_types.js",
+    "propertyTests": "npm run build && node ./dist/property_tests.js",
+    "changedProducts": "npm run build && node ./dist/changed_products.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.12.12",
+    "prettier": "3.2.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "fast-check": "^3.18.0",
+    "fp-ts": "^2.16.6",
+    "io-ts": "^2.2.21",
+    "yup": "^1.4.0"
+  }
+}

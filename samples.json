@@ -1,0 +1,36 @@
+
+[
+
+{
+    "id": 1285,
+    "name": "Alex Sugak",
+    "age": 39
+}
+
+,
+
+{
+    "id": "TS-234",
+    "name": "Black T-Shirt",
+    "price": 120
+}
+
+,
+
+{
+    "id": "TS-234",
+    "name": "Black T-Shirt",
+    "price": 80
+}
+
+,
+
+{
+
+"email": "aleksandr.sugak@gmail.com",
+"birthDate": "12/04/85",
+"placeOfBirth": "Kharkiv"
+
+}
+
+]
