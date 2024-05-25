@@ -2,55 +2,75 @@ import * as t from 'io-ts'
 
 // primitives
 
-declare const nl: null
+// --------------------------
 
-declare const s: string
+    declare const nl: null
 
-declare const n: number
+    declare const s: string
 
-const ioNl = t.null
+    declare const n: number
 
-const ioS = t.string
+// --------------------------
 
-const ioN = t.number
+    const ioNl = t.null
 
-// composition
+    const ioS = t.string
 
-declare const obj: {
-  name: string
-  age: number
-}
+    const ioN = t.number
 
-declare const u: 'Foo' | 'Bar'
+// --------------------------
 
-const ioObj = t.type({
-  name: t.string,
-  age: t.number,
-})
+// composition--------------------
+// -------------------------------
 
-const ioU = t.union([t.literal('Foo'), t.literal('Bar')])
+    declare const obj: {
+      name: string
+      age: number
+    }
 
-declare const p: { a: string } & { b: number }
+    declare const p: 
+      { a: string } & 
+      { b: number }
 
-const ioP = t.intersection([
-  t.type({ a: t.string }), 
-  t.type({ b: t.number })
-])
 
-// infering types
+    declare const u: 'Foo' | 'Bar'
 
-type ioObjT = t.TypeOf<typeof ioObj>
-// type ioObjT = {
-//   name: string;
-//   age: number;
-// }
 
-type ioUT = t.TypeOf<typeof ioU>
-// type ioUT = "Foo" | "Bar"
 
-type ioPT = t.TypeOf<typeof ioP>
-// type ioPT = {
-//   a: string;
-// } & {
-//   b: number;
-// }
+
+// -------------------------------
+
+    const ioObj = t.type({
+      name: t.string,
+      age: t.number,
+    })
+
+    const ioP = t.intersection([
+      t.type({ a: t.string }), 
+      t.type({ b: t.number })
+    ])
+
+    const ioU = t.union([
+      t.literal('Foo'), 
+      t.literal('Bar')]
+    )
+
+// -------------------------------
+
+    type ioObjT = t.TypeOf<typeof ioObj>
+    // type ioObjT = {
+    //   name: string;
+    //   age: number;
+    // }
+
+    type ioPT = t.TypeOf<typeof ioP>
+    // type ioPT = {
+    //   a: string;
+    // } & {
+    //   b: number;
+    // }
+
+    type ioUT = t.TypeOf<typeof ioU>
+    // type ioUT = "Foo" | "Bar"
+
+// -------------------------------
